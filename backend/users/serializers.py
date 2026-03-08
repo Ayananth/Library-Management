@@ -27,3 +27,10 @@ class RegisterSerializer(serializers.ModelSerializer):
 
         )
         return user
+    
+
+class AvatarSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ["avatar"]
