@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from .models import User
-from .serializers import RegisterSerializer, AvatarSerializer
+from .serializers import RegisterSerializer, AvatarSerializer, ProfileSerializer
 
 
 
@@ -40,3 +40,11 @@ class AvatarDeleteView(APIView):
         return Response({
             "message": "Avatar deleted successfully"
         })
+
+
+class ProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        serializer = ProfileSerializer(request.user)
+        return Response(serializer.data)

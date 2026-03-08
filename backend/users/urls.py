@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import RegisterView, AvatarDeleteView, AvatarUploadView
+from .views import RegisterView, AvatarDeleteView, AvatarUploadView, ProfileView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 urlpatterns = [
@@ -9,4 +9,5 @@ urlpatterns = [
 
     path("avatar/", AvatarUploadView.as_view()),
     path("avatar/delete/", AvatarDeleteView.as_view()),
+    path("profile/", ProfileView.as_view(), name="profile"),
 ]
