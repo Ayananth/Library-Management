@@ -239,4 +239,3 @@ Typical response patterns:
 
 - Book `publication_date` cannot be in the future.
 - Avatar upload requires `multipart/form-data`.
-- Media is served in debug mode via Django settings.
