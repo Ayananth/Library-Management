@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from .models import User
-from .serializers import RegisterSerializer, AvatarSerializer, ProfileSerializer
+from .serializers import RegisterSerializer, AvatarSerializer, ProfileSerializer, LogoutSerializer
 
 
 
@@ -48,3 +48,12 @@ class ProfileView(APIView):
     def get(self, request):
         serializer = ProfileSerializer(request.user)
         return Response(serializer.data)
+
+
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = LogoutSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        return Response({"message": "Logged out successfully."}, status=status.HTTP_205_RESET_CONTENT)
