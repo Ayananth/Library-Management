@@ -1,4 +1,6 @@
 from rest_framework import serializers
+import re
+
 from .models import User
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
@@ -8,6 +10,7 @@ from rest_framework_simplejwt.exceptions import TokenError
 
 class RegisterSerializer(serializers.ModelSerializer):
     confirm_password = serializers.CharField(write_only=True)
+    RESERVED_USERNAMES = {"admin", "root", "support", "help", "me"}
 
     class Meta:
         model = User
@@ -22,6 +25,34 @@ class RegisterSerializer(serializers.ModelSerializer):
         except DjangoValidationError as e:
             raise serializers.ValidationError(e.messages)
         return value
+
+    def validate_username(self, value):
+        username = value.strip()
+
+        if username != value:
+            raise serializers.ValidationError("Username cannot start or end with spaces.")
+
+        if len(username) < 3:
+            raise serializers.ValidationError("Username must be at least 3 characters long.")
+
+        if len(username) > 30:
+            raise serializers.ValidationError("Username must be at most 30 characters long.")
+
+        if not re.fullmatch(r"[A-Za-z][A-Za-z0-9_]*", username):
+            raise serializers.ValidationError(
+                "Username must start with a letter and contain only letters, numbers, and underscores."
+            )
+
+        if "__" in username:
+            raise serializers.ValidationError("Username cannot contain consecutive underscores.")
+
+        if username.lower() in self.RESERVED_USERNAMES:
+            raise serializers.ValidationError("This username is not allowed.")
+
+        if User.objects.filter(username__iexact=username).exists():
+            raise serializers.ValidationError("A user with that username already exists.")
+
+        return username
 
     def validate(self, attrs):
         if attrs["password"] != attrs["confirm_password"]:
