@@ -42,7 +42,10 @@ class ReadingListListCreateView(APIView):
         serializer = ReadingListCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        reading_list = create_reading_list(user=request.user, name=serializer.validated_data["name"])
+        try:
+            reading_list = create_reading_list(user=request.user, name=serializer.validated_data["name"])
+        except ValueError as exc:
+            return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
         output = ReadingListSerializer(reading_list)
         return Response(output.data, status=status.HTTP_201_CREATED)
 
@@ -79,7 +82,10 @@ class ReadingListDetailView(APIView):
         serializer = ReadingListUpdateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        updated = update_reading_list(reading_list=reading_list, name=serializer.validated_data["name"])
+        try:
+            updated = update_reading_list(reading_list=reading_list, name=serializer.validated_data["name"])
+        except ValueError as exc:
+            return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
         output = ReadingListSerializer(updated)
         return Response(output.data, status=status.HTTP_200_OK)
 

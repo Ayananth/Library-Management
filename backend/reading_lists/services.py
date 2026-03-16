@@ -5,10 +5,18 @@ from .models import ReadingList, ReadingListItem
 
 
 def create_reading_list(*, user, name):
+    if ReadingList.objects.filter(user=user, name=name).exists():
+        raise ValueError("You already have a reading list with this name.")
     return ReadingList.objects.create(user=user, name=name)
 
 
 def update_reading_list(*, reading_list, name):
+    if (
+        ReadingList.objects.filter(user=reading_list.user, name=name)
+        .exclude(pk=reading_list.pk)
+        .exists()
+    ):
+        raise ValueError("You already have a reading list with this name.")
     reading_list.name = name
     reading_list.save(update_fields=["name"])
     return reading_list

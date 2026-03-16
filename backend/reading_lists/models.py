@@ -17,6 +17,14 @@ class ReadingList(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "name"],
+                name="unique_reading_list_name_per_user",
+            ),
+        ]
+
 
 class ReadingListItem(models.Model):
 
