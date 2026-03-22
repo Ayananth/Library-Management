@@ -1,4 +1,5 @@
 from rest_framework import status
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -30,13 +31,21 @@ from .services import (
 )
 
 
+class ReadingListPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = "page_size"
+    max_page_size = 100
+
+
 class ReadingListListCreateView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         reading_lists = list_reading_lists_for_user(user=request.user)
-        serializer = ReadingListSerializer(reading_lists, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        paginator = ReadingListPagination()
+        paginated_reading_lists = paginator.paginate_queryset(reading_lists, request)
+        serializer = ReadingListSerializer(paginated_reading_lists, many=True)
+        return paginator.get_paginated_response(serializer.data)
 
     def post(self, request):
         serializer = ReadingListCreateSerializer(data=request.data)
