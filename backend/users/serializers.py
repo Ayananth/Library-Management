@@ -1,11 +1,14 @@
-from rest_framework import serializers
+import logging
 import re
 
+from rest_framework import serializers
 from .models import User
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
+
+logger = logging.getLogger(__name__)
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -67,6 +70,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         user = User(**validated_data)
         user.set_password(validated_data["password"])
         user.save()
+        logger.info("User registered: user_id=%s username=%s", user.id, user.username)
 
         return user
 
@@ -94,6 +98,7 @@ class LogoutSerializer(serializers.Serializer):
             token = RefreshToken(refresh_token)
             token.blacklist()
         except TokenError:
+            logger.warning("Logout failed: invalid or expired refresh token.")
             raise serializers.ValidationError({"refresh": "Invalid or expired refresh token."})
 
         return attrs
